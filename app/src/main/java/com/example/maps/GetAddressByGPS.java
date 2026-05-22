@@ -7,7 +7,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 import org.jsoup.Jsoup;
-import org.w3c.dom.Document;
+import org.jsoup.nodes.Document;
 import org.w3c.dom.Text;
 
 import java.io.IOException;
@@ -34,5 +34,8 @@ public class GetAddressByGPS extends AsyncTask<Void, Void, Void> {
         }
         return null;
     }
-
+    @Override
+    protected void onPostExecute(Void voids) {
+        textAddress.setText(Response.response.GeoObjectCollection.featureMember.get(0).GeoObject.metaDataProperty.GeocoderMetaData.text);
+    }
 }

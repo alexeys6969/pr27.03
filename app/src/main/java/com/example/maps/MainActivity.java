@@ -72,7 +72,7 @@ public class MainActivity extends AppCompatActivity {
                         ImageProvider.fromResource(MainActivity.this, R.drawable.location)
                 );
                 GetAddressByGPS getAddressByGPS = new GetAddressByGPS(
-                        String.valueOf(getLongitude()) + "," + String.valueOf(location.getLatitude()),
+                        String.valueOf(location.getLongitude()) + "," + String.valueOf(location.getLatitude()),
                         textAddress
                 );
                 getAddressByGPS.execute();

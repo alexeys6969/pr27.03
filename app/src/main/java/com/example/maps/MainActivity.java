@@ -1,5 +1,7 @@
 package com.example.maps;
 
+import android.Manifest;
+import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -9,6 +11,7 @@ import android.widget.TextView;
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -24,6 +27,20 @@ public class MainActivity extends AppCompatActivity {
     TextView textAddress;
     MapView mapView;
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+        MapKitFactory.getInstance().onStart();
+        if(ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
+                ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this,
+                    new String[] { Manifest.permission.ACCESS_FINE_LOCATION }, 1);
+        }
+
+        _LocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000, 10, _locationListner);
+        _LocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 10, _locationListner);
+        mapView.onStart();
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,8 +50,15 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         mapView = findViewById(R.id.mapView);
         textAddress = findViewById(R.id.edittext);
-        _LocationManager = (LocationManager) getSystemService(LOCALE_SERVICE);
+        _LocationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
     }
+    @Override
+    protected void onStop() {
+        super.onStop();
+        mapView.onStop();
+        MapKitFactory.getInstance().onStop();
+    }
+
     LocationListener _locationListner = new LocationListener() {
         @Override
         public void onLocationChanged(@NonNull Location location) {
@@ -45,7 +69,10 @@ public class MainActivity extends AppCompatActivity {
                 mapView.getMap().getMapObjects().clear();
                 mapView.getMap().getMapObjects().addPlacemark(
                         new Point(location.getLatitude(), location.getLongitude()),
-                        ImageProvider.fromResource(location.getLongitude()) + "," + String.valueOf(location.getLatitude()),
+                        ImageProvider.fromResource(MainActivity.this, R.drawable.location)
+                );
+                GetAddressByGPS getAddressByGPS = new GetAddressByGPS(
+                        String.valueOf(getLongitude()) + "," + String.valueOf(location.getLatitude()),
                         textAddress
                 );
                 getAddressByGPS.execute();
